@@ -7,8 +7,12 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/eggbertx/goevents"
+	"github.com/jiyeyuran/go-eventemitter"
 	lua "github.com/yuin/gopher-lua"
+)
+
+var (
+	em = eventemitter.NewEventEmitter()
 )
 
 type testPost struct {
@@ -25,7 +29,7 @@ func loadObjects() {
 		fmt.Println("Adding listener for", name)
 		cb := l.ToFunction(2)
 
-		goevents.AddListener(name, func(interfaces ...interface{}) {
+		em.On(name, func(interfaces ...interface{}) {
 			if len(interfaces) != 1 {
 				return
 			}
@@ -54,14 +58,14 @@ func loadObjects() {
 			if err != nil {
 				panic(err.Error())
 			}
-		}, nil)
+		})
 
 		return 0
 	}))
 
 	state.SetGlobal("doEvents", state.NewFunction(func(l *lua.LState) int {
 		fmt.Println("calling doEvents()")
-		goevents.Emit("post-received", testPost{
+		em.Emit("post-received", testPost{
 			ID:      99,
 			Name:    "Poster",
 			Email:   "noko",
